@@ -6,8 +6,16 @@ This project is related to the Data Science Nanodegree on Udacity (https://class
 
 ## Goal:
 
-The goal of this project is to extract meaningful information of unstructured textual data (messages such as tweets) to be able to categorize new unseen messages as being related to one or more of various categories about disasters.
+The goal of this project is to extract meaningful information of unstructured textual data (messages such as tweets) to be able to categorize new unseen messages as being related to one or more out of various categories about disasters.
 This could be used by emergency workers to help in their jobs in prioritizing assistances during disasters.
+
+
+## Pre-requisites:
+
+The following instructions will only work if one has, in advance these files:
+- `disaster_messages.csv`: file with the dataset containing real messages that were sent during disaster events;
+- `disaster_categories.csv`: file with the list of different categories for the messages.
+
 
 ## Details:
 
@@ -21,13 +29,8 @@ This repository consists the following scripts and files:
 - process_data.py: 
 - train_classifier.py:
 - run.py:
-
-
-## Pre-requisites:
-
-The following instructions will only work if one has, in advance these files:
-- `disaster_messages.csv`: file with the dataset containing the original messages, not processed yet;
-- `disaster_categories.csv`: file with the list of different categories for the messages.
+- ....
+- ....
 
 
 ## Instructions:
