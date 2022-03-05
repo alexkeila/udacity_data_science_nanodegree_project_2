@@ -10,7 +10,7 @@ The goal of this project is to extract meaningful information of unstructured te
 This could be used by emergency workers to help in their jobs in prioritizing assistances during disasters.
 
 
-## Pre-requisites:
+## Prerequisites:
 
 The following instructions will only work if one has, in advance these files:
 - `disaster_messages.csv`: file with the dataset containing real messages that were sent during disaster events;
