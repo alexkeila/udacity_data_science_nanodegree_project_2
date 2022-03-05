@@ -26,12 +26,20 @@ The outputs of this project are:
 
 
 This repository consists the following scripts and files:
-- process_data.py: 
-- train_classifier.py:
-- run.py:
-- ....
-- ....
 
+```
+.
+├── data                        # directory to save the .csv files containing the messages and categories
+|    ├── process_data.py
+├── model                       # directory where the model will be saved
+|    ├── train_classifier.py
+├── app                         # directory with all files related to the web app
+|    ├── run.py                    
+|    ├── templates              # directory with HMTL files to generate the web app frontend
+|           ├── go.html
+|           ├── master.html
+└── README.md
+```
 
 ## Instructions:
 
