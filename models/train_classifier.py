@@ -1,5 +1,6 @@
 # basic libraries:
 import sys
+import numpy as np
 import pandas as pd
 
 # database connection libraries:
@@ -33,6 +34,11 @@ def load_data(database_filepath):
     engine = create_engine('sqlite:///{}'.format(database_filepath))
     df = pd.read_sql_table('DisasterMessages', con=engine)
     
+    # I do not know why, but for some reason, there are some observations with the related category equals 2?!?
+    # forcing the observations with related = 2 to be = 1,
+    # since it is a multilabel classification, but not a multi-output classification (each category is binary):
+    df['related'] = np.where(df['related'] == 2, 1, df['related'])
+    
     X = df['message']
     y = df.drop(['message', 'original', 'id', 'genre'], axis=1, inplace=False)
     
@@ -65,13 +71,29 @@ def tokenize(text):
 
 def build_model():
     
+    # creating the pipeline object:
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
         ('clf', MultiOutputClassifier(RandomForestClassifier()))
     ])
     
-    return pipeline
+    # dictionary of hyperparameters to try and choose the best ones:
+    # it takes a long long time to run with lots of combinations, so I tried to leave here just some few options:
+    parameters = {
+        'vect__max_features': (500, 750),
+        #'clf__estimator__n_estimators': [20, 30], # I left the default value for n_estimators
+        'clf__estimator': [
+            RandomForestClassifier(),
+            RidgeClassifier()
+        ]
+    }
+
+    # after the cross validation, the model with the best parameters will be trained and accessible on this object:
+    pipeline_cv = GridSearchCV(estimator=pipeline, param_grid=parameters, refit=True, cv=3,
+                           scoring='f1_samples')
+    
+    return pipeline_cv
 
 
 # function to print the classification report for the given label:
