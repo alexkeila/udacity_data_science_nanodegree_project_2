@@ -49,14 +49,17 @@ To be able to reproduce my work, one can follow these steps:
 
 2. Run the following commands in the project's root directory to set up your database and model:
 
-  2.1. Run the line of code below to run an ETL pipeline that cleans data and stores in a database:
-    `python data/process_data.py data/disaster_messages.csv data/disaster_categories.csv data/DisasterResponse.db`
+    2.1. Run the line of code below to run an ETL pipeline that cleans data and stores in a database:
+      `python data/process_data.py data/disaster_messages.csv data/disaster_categories.csv data/DisasterResponse.db`
 
-  2.2. Run the line of code below to run a ML pipeline that trains a classifier and saves it on disk:
-    `python models/train_classifier.py data/DisasterResponse.db models/classifier.pkl`
+    2.2. Run the line of code below to run a ML pipeline that trains a classifier and saves it on disk:
+      `python models/train_classifier.py data/DisasterResponse.db models/classifier.pkl`
 
 3. Run the line of code below in the app's directory to run your web app:
     `python run.py`
 
 4. After the app is up and running, one can open this url and try the web app: http://0.0.0.0:3001/
 
+5. It should be possible to use this web app to test the classifier just created by typing some text and checking how it is categorized;
+
+6. Is is also possible to see some visualizations about the dataset used to train the model.
