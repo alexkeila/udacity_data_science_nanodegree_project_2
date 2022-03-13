@@ -7,6 +7,16 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 def load_data(messages_filepath, categories_filepath):
+    """
+    Function to load the datasets, merge them together and save it on a dataframe
+    
+    Parameters:
+    messages_filepath (str): path to the messages dataset
+    categories_filepath (str): path to the categories dataset
+
+    Returns:
+    dataframe: result of the loaded and merged data
+    """
     
     # load messages dataset:
     df_messages = pd.read_csv(messages_filepath)
@@ -21,6 +31,15 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def clean_data(df):
+    """
+    Function to clean the dataset and save it on a new dataframe
+    
+    Parameters:
+    df (dataframe): data to be cleaned
+
+    Returns:
+    dataframe: result of the cleaned data
+    """
     
     # create a dataframe of all the individual category columns:
     categories = df['categories'].str.split(pat=';', expand=True)
@@ -56,6 +75,16 @@ def clean_data(df):
 
 
 def save_data(df, database_filename):
+    """
+    Function to save a dataset on the chosen database
+    
+    Parameters:
+    df (dataframe): data to be saved on the database
+    database_filename(str): path to where the database is located on disk
+
+    Returns:
+    None
+    """
 
     engine = create_engine('sqlite:///{}'.format(database_filename))
     df.to_sql('DisasterMessages', engine, index=False)
