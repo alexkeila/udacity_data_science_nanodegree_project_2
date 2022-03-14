@@ -14,15 +14,13 @@ import string
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-
-from nltk.stem.porter import PorterStemmer
 from nltk.stem.wordnet import WordNetLemmatizer
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer, TfidfVectorizer
 
 # machine learning libraries:
+from sklearn.linear_model import RidgeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.multioutput import MultiOutputClassifier
-
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn import metrics
@@ -30,6 +28,19 @@ import pickle
 
 
 def load_data(database_filepath):
+    """
+    Function to read the dataset from the database
+    
+    Parameters:
+    database_filepath (str): path to where the database is located on disk
+    
+    Returns:
+    Series: all messages named as X (input of a model) 
+    dataframe: classification of all categories named as y (label of a model)
+    list: name of the categories
+    """
+    
+    
     # load data from database:
     engine = create_engine('sqlite:///{}'.format(database_filepath))
     df = pd.read_sql_table('DisasterMessages', con=engine)
@@ -37,7 +48,8 @@ def load_data(database_filepath):
     # I do not know why, but for some reason, there are some observations with the related category equals 2?!?
     # forcing the observations with related = 2 to be = 1,
     # since it is a multilabel classification, but not a multi-output classification (each category is binary):
-    df['related'] = np.where(df['related'] == 2, 1, df['related'])
+    # 13/03/2022 - Moved this code to the 'process_data.py' script
+    ##df['related'] = np.where(df['related'] == 2, 1, df['related'])
     
     X = df['message']
     y = df.drop(['message', 'original', 'id', 'genre'], axis=1, inplace=False)
@@ -48,30 +60,40 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
-    # Remove numbers:
+    """
+    Function to tokenize some text (divide into different words - 'tokens')
+    
+    Parameters:
+    text (str): text to be tokenized
+    
+    Returns:
+    list: tokens for the text passed as parameter 
+    """
+    
+    # remove numbers:
     text = re.sub(r"[0-9]", " ", text)
     
-    # Convert to lowercase:
+    # convert to lowercase:
     text = text.lower()
     
-    # Remove punctuation characters:
+    # remove punctuation characters:
     text = text.translate(str.maketrans('', '', string.punctuation))
     
+    # divide into words:
     tokenized_words = word_tokenize(text)
+    
+    # remove stopwords:
     tokenized_words = [word for word in tokenized_words if word not in stopwords.words("english")]
     
-    # Reduce words to their root form:
+    # reduce words to their root form:
     lemmed_words = [WordNetLemmatizer().lemmatize(w) for w in tokenized_words]
     
-    # Reduce words to their stems:
-    stemmed_words = [PorterStemmer().stem(w) for w in lemmed_words]
-    
-    return stemmed_words
+    return lemmed_words
 
 
 def build_model():
     
-    # creating the pipeline object:
+    # create the pipeline object:
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
@@ -90,7 +112,7 @@ def build_model():
     }
 
     # after the cross validation, the model with the best parameters will be trained and accessible on this object:
-    pipeline_cv = GridSearchCV(estimator=pipeline, param_grid=parameters, refit=True, cv=3,
+    pipeline_cv = GridSearchCV(estimator=pipeline, param_grid=parameters, refit=True, cv=3, verbose=3,
                            scoring='f1_samples')
     
     return pipeline_cv
