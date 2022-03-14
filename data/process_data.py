@@ -1,10 +1,9 @@
 # import libraries
 import sys
-
 import numpy as np
 import pandas as pd
-
 from sqlalchemy import create_engine
+
 
 def load_data(messages_filepath, categories_filepath):
     """
@@ -71,6 +70,11 @@ def clean_data(df):
     # remove duplicates:
     df.drop_duplicates(inplace=True)
     
+    # the 'related' column contains 3 unique values (0, 1, 2)
+    # convert to a binary category by forcing the observations with related = 2 to be = 1,
+    # since it is a multilabel classification, but not a multi-output classification (each category is binary):
+    df['related'] = np.where(df['related'] == 2, 1, df['related'])
+    
     return df
 
 
@@ -80,14 +84,14 @@ def save_data(df, database_filename):
     
     Parameters:
     df (dataframe): data to be saved on the database
-    database_filename(str): path to where the database is located on disk
+    database_filename (str): path to where the database is located on disk
 
     Returns:
     None
     """
 
     engine = create_engine('sqlite:///{}'.format(database_filename))
-    df.to_sql('DisasterMessages', engine, index=False)
+    df.to_sql('DisasterMessages', engine, if_exists='replace', index=False)
 
 
 def main():
