@@ -1,29 +1,35 @@
+# basic libraries:
 import json
-import plotly
+import random
 import numpy as np
 import pandas as pd
-import random
 
+# database connection libraries:
+from sqlalchemy import create_engine
+
+# string libraries:
 import re
 import string
 
+# nlp libraries:
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-
-from nltk.stem.porter import PorterStemmer
 from nltk.stem.wordnet import WordNetLemmatizer
 from collections import Counter
 
+# visualization libraries:
+import plotly
 from flask import Flask
 from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar, Scatter
-from sklearn.externals import joblib
-from sqlalchemy import create_engine
 
+from sklearn.externals import joblib
 
 app = Flask(__name__)
 
+
+# replacing the original function to one of my own:
 """
 def tokenize(text):
     tokens = word_tokenize(text)
@@ -37,28 +43,47 @@ def tokenize(text):
     return clean_tokens
 """
 
+# same function as the one from the train_classifier.py script:
 def tokenize(text):
-    # Remove numbers:
+    """
+    Function to tokenize some text (divide into different words - 'tokens')
+    
+    Parameters:
+    text (str): text to be tokenized
+    
+    Returns:
+    list: tokens for the text passed as parameter 
+    """
+    
+    # remove numbers:
     text = re.sub(r"[0-9]", " ", text)
     
-    # Convert to lowercase:
+    # convert to lowercase:
     text = text.lower()
     
-    # Remove punctuation characters:
+    # remove punctuation characters:
     text = text.translate(str.maketrans('', '', string.punctuation))
     
+    # divide into words:
     tokenized_words = word_tokenize(text)
+    
+    # remove stopwords:
     tokenized_words = [word for word in tokenized_words if word not in stopwords.words("english")]
+    
+    # reduce words to their root form:
+    lemmed_words = [WordNetLemmatizer().lemmatize(w) for w in tokenized_words]
     
     return tokenized_words
 
-# load data
+
+# load data:
 engine = create_engine('sqlite:///../data/DisasterResponse.db')
 df = pd.read_sql_table('DisasterMessages', engine)
 
-# load model
+# load model:
 model = joblib.load("../models/classifier.pkl")
 
+# download of stopwords:
 nltk.download('stopwords')
 
 
@@ -67,7 +92,7 @@ nltk.download('stopwords')
 @app.route('/index')
 def index():
     
-    # extract data needed for visuals
+    # extract data needed for visuals:
     df_genre = df.groupby(by=['genre'], as_index=False).agg({
         'message': ['count']
     })
@@ -76,22 +101,19 @@ def index():
     
     df_genre = df_genre.sort_values(by='num_msgs', ascending=True).head(10)
     
+    # taking just a few words to try to plot in a Word Cloud (TOP 100):
     words = ' '.join(df['message'])
     tokens = tokenize(words)
     counts = Counter(tokens)
-    
     sorted_dict = dict( sorted(counts.items(), key=lambda item: item[1], reverse=True) )
-    
-    words = list(sorted_dict.keys())[:100]
     frequency = list(sorted_dict.values())[:100]
-    
-    length = len(words)
-    #colors = [plotly.colors.DEFAULT_PLOTLY_COLORS[random.randrange(1, 10)] for i in range(30)]
-    colors = ['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52']
+    words = list(sorted_dict.keys())[:100]
     weights = [np.sqrt(random.random()*freq) for freq in frequency]
+    colors = ['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52']
 
-    # create visuals
+    # create visuals:
     graphs = [
+        # chart #1:
         {
             'data': [
                 Bar(
@@ -112,11 +134,12 @@ def index():
             }
         },  
         
+        # chart #2:
         {
             'data': [
                 Scatter(
-                    x=random.choices(range(length), k=length),
-                    y=random.choices(range(length), k=length),
+                    x=random.choices(range(len(words)), k=len(words)),
+                    y=random.choices(range(len(words)), k=len(words)),
                     mode='text',
                     text=words,
                     #hovertext=['{0}{1}'.format(w, f) for w, f in zip(words, frequency)],
@@ -144,6 +167,7 @@ def index():
         }
         
     ]
+    
     
     # encode plotly graphs in JSON
     ids = ["graph-{}".format(i) for i, _ in enumerate(graphs)]
