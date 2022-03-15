@@ -23,6 +23,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
 from sklearn import metrics
 import pickle
 
@@ -92,6 +93,15 @@ def tokenize(text):
 
 
 def build_model():
+    """
+    Function to build the structure of the model using Pipeline and GridSearchCV
+    
+    Parameters:
+    None
+    
+    Returns:
+    estimator: model ready to be trained 
+    """
     
     # create the pipeline object:
     pipeline = Pipeline([
@@ -120,6 +130,17 @@ def build_model():
 
 # function to print the classification report for the given label:
 def display_results(y_test, y_test_pred, label):
+    """
+    Function to print the classification report for the given label
+    
+    Parameters:
+    y_test (list): values of y from the test dataset
+    y_test_pred (list): values of estimated y using a model
+    label (str): name of the category
+    
+    Returns:
+    None
+    """
     
     print("Classification report for category {}:\n".format(label))
     print(metrics.classification_report(y_test[label], y_test_pred[label]))
@@ -130,6 +151,18 @@ def display_results(y_test, y_test_pred, label):
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    """
+    Function to print the classification report for all labels
+    
+    Parameters:
+    model (estimator): model to be evaluated
+    X_test (dataframe): values of X from the test dataset
+    Y_test (dataframe): values of y from the test dataset
+    category_names (list): all categories
+    
+    Returns:
+    None
+    """
     
     Y_test_pred = model.predict(X_test)
     Y_test_pred = pd.DataFrame(Y_test_pred, columns=Y_test.columns)
@@ -138,6 +171,17 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
+    """
+    Function to save the model on disk
+    
+    Parameters:
+    model (estimator): model to be saved
+    model_filepath (str): path chosen to save the model on disk
+    
+    Returns:
+    None
+    """
+    
     with open(model_filepath, 'wb') as file:
         pickle.dump(model, file)
 
